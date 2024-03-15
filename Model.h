@@ -1,22 +1,22 @@
-#ifndef __MODEL_H__
-#define __MODEL_H__
+#pragma once
 
-#include"Gmath.h"
-#include<vector>
+#include "Gmath.h"				//数学库
+#include "tgaimage.h"
+#include "Texture.h"			
+#include "Triangle.h"			
 
 class Model
 {
 private:
-	vector<Vector3> verts_;						//顶点个数
-	vector<vector<int>> faces_;					//三角形数
-	vector<Vector3> norms_;						//法线
+	Texture* texture = nullptr;					//纹理名字
+	int vertNum;								//顶点数
+	int faceNum;								//面数
+
 public:
-	Model(const char*);							//根据文件导入模型
+	vector<triangle> triangleList;				//三角形表
+	Model(const char*);							//根据文件导入模型函数
 	~Model();	
-	int nVerts();								//返回顶点个数
-	int nFaces();								//返回三角形数
-	Vector3 vert(int i);						//返回第i个顶点
-	vector<int> face(int idx);					//返回第i个三角形
+	int nVerts();								//返回顶点个数的函数
+	int nFaces();								//返回三角形数的函数
 };
 
-#endif 

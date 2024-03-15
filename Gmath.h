@@ -1,12 +1,10 @@
-#ifndef __GEOMETRY_H__
-#define __GEOMETRY_H__
+#pragma once
 
 #pragma warning(disable:4996)
-#include <iostream>
-#include <algorithm>
-#include <windows.h>
+#include<iostream>
+#include<algorithm>
 #include <vector>
-#include <assert.h>
+#include<assert.h>
 using namespace std;
 
 #define white RGB(255,255,255)
@@ -15,8 +13,7 @@ using namespace std;
 #define yellow RGB(255,255,0)
 #define green RGB(0,255,128)
 #define blue RGB(0,255,255)
-#define width 600		//屏幕宽度
-#define height 600		//屏幕高度
+
 
 //二维向量
 class Vector2
@@ -35,16 +32,25 @@ public:
 		this->y = v1.y;
 		return *this;
 	}
-	float operator[](const int idx)
+	float operator[](int idx)
 	{
 		if (idx <= 0)
 			return x;
 		else
 			return y;
 	}
-	Vector2 operator +(const Vector2&);
-	Vector2 operator -(const Vector2&);
-	Vector2 operator *(float);
+	Vector2 operator +(const Vector2& v)
+	{
+		return Vector2(x + v.x, y + v.y);
+	}
+	Vector2 operator -(const Vector2& v)
+	{
+		return Vector2(x - v.x, y - v.y);
+	}
+	Vector2 operator *(float n)
+	{
+		return Vector2(x * n, y * n);
+	}
 };
 
 //三维向量
@@ -69,7 +75,7 @@ public:
 		this->z = v1.z;
 		return *this;
 	}
-	float operator[](const int idx)
+	float operator[](int idx)
 	{
 		if (idx <= 0)
 			return x;
@@ -78,17 +84,53 @@ public:
 		else
 			return z;
 	}
-	float operator*(const Vector3&);			//点乘
-	Vector3 operator^(const Vector3&);			//叉乘
-	Vector3 operator+(const Vector3&);			//加法
-	Vector3 operator-(const Vector3&);			//减法
-	Vector3 operator*(float);					//向量数乘				
-	Vector3 operator/(float);					//除法
-	bool operator==(const  Vector3&);			//判断向量是否相等
-	bool operator!=(const  Vector3&);
-	Vector3 Lerp(const Vector3&, const  Vector3&, float);		//线性插值
-	float normal();												//模长
-	Vector3 normalize();										//单位化
+	Vector3 operator+(const Vector3& v)		//加法
+	{
+		return Vector3(x + v.x, y + v.y, z + v.z);
+	}
+	Vector3 operator-(const Vector3& v)		//减法
+	{
+		return Vector3(x - v.x, y - v.y, z - v.z);
+	}
+	float operator*(const Vector3& v)		//乘法
+	{
+		return x * v.x + y * v.y + z * v.z;
+	}
+	Vector3 operator^(const Vector3& v)		//叉乘
+	{
+		return Vector3((y * v.z - z * v.y), (z * v.x - x * v.z), (x * v.y - y * v.x));
+	}
+	Vector3 operator*(float a)				//数乘
+	{
+		return Vector3(a * x, a * y, a * z);
+	}
+	Vector3 operator/(float a)				//除法
+	{
+		return Vector3(x / a, y / a, z / a);
+
+	}
+	float normal()							//模长
+	{
+		return sqrt(x * x + y * y + z * z);
+	}										
+	Vector3 normalize()						//单位化
+	{
+		return Vector3(x /= normal(), y /= normal(), z /= normal());
+	}
+	Vector3 Lerp(const Vector3& from, const Vector3& to, float t)
+	{
+		return Vector3((to.x - from.x) * t + from.x, (to.y - from.y) * t + from.y,
+			(to.z - from.z) * t + from.z);
+	}
+	bool operator==(const  Vector3& v)				//判断向量是否相等
+	{
+		return ((x == v.x) && (y == v.y) && (z == v.z));
+	}
+	bool operator!=(const Vector3& v)
+	{
+		return ((x != v.x) || (y != v.y) || (z != v.z));
+	}
+
 };
 
 //四维向量
@@ -115,7 +157,7 @@ public:
 		this->w = v1.w;
 		return *this;
 	}
-	float operator[](const int idx)
+	float& operator[](const int idx)
 	{
 		if (idx <= 0)
 			return x;
@@ -126,12 +168,30 @@ public:
 		else
 			return w;
 	}
-	Vector4 operator+(const Vector4&);			//加法
-	Vector4 operator-(const Vector4&);			//减法
-	float operator*(const Vector4&);			//点乘
-	Vector4 operator*(float);					//数乘				
-	float normal();								//模长
-	Vector4 normalize();						//单位化
+	Vector4 operator+(const Vector4& v)			//加法
+	{
+		return Vector4(x + v.x, y + v.y, z + v.z, w + v.w);
+	}
+	Vector4 operator-(const Vector4& v)			//减法
+	{
+		return Vector4(x - v.x, y - v.y, z - v.z, w - v.w);
+	}
+	float operator*(const Vector4& v)			//点乘
+	{
+		return x * v.x + y * v.y + z * v.z + w * v.w;
+	}
+	Vector4 operator*(float a)					//数乘
+	{
+		return Vector4(a * x, a * y, a * z, a * w);
+	}
+	float normal()								//模长
+	{
+		return sqrt(x * x + y * y + z * z + w * w);
+	}
+	Vector4 normalize()							//单位化
+	{
+		return Vector4(x /= normal(), y /= normal(), z /= normal(), w /= normal());
+	}
 };
 
 //矩阵
@@ -139,17 +199,87 @@ class Matrix
 {
 private:
 	vector<vector<float>> m;
-	int rows, cols;
+	int rows, cols;												
 public:
-	Matrix(int, int);
-	int nrows();
-	int ncols();
-	static Matrix identity(int);							//返回单位矩阵
-	vector<float>& operator[](const int);					//访问第i行
-	Matrix operator*(const Matrix&); 						//矩阵乘法
-	Matrix transpose();										//转置
+	Matrix(int r = 0, int c = 0) : rows(r), cols(c)	//构造函数
+	{
+		m = vector<vector<float>>(r, vector<float>(c, 0.0f));		//r行c列
+	}
+	int nrows()
+	{
+		return rows;
+	}
+	int ncols()
+	{
+		return cols;
+	}
+	static Matrix identity(int dimensions)			//单位化						
+	{
+		//dimensions维度
+		Matrix E(dimensions, dimensions);
+		for (int i = 0; i < dimensions; i++)
+			for (int j = 0; j < dimensions; j++)
+				E[i][j] = (i == j ? 1.0f : 0.0f);
+		return E;
+	}
+	vector<float>& operator[](const int i)
+	{
+		assert(i >= 0 && i < rows);
+		return m[i];
+	}
+	Matrix operator*(const Matrix& a)		//乘
+	{
+		assert(cols == a.rows);			//左列=右行
+		Matrix ans(rows, a.cols);
+		for (int i = 0; i < rows; i++)
+			for (int j = 0; j < a.cols; j++)
+				for (int k = 0; k < cols; k++)
+					ans[i][j] += m[i][k] * a.m[k][j];
+		return ans;
+	}
+	Matrix transpose()			//转置
+	{
+		Matrix ans(cols, rows);
+		for (int i = 0; i < rows; i++)
+			for (int j = 0; j < cols; j++)
+				ans[i][j] = m[j][i];
+		return ans;
+	}
+	Matrix operator*(Vector4& v)
+	{
+		Matrix ans(4, 1);
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				ans[i][0] += m[i][j] * v[j];
+			}
+		}
+		return ans;
+	}
+
 };
 
+//3阶矩阵
+class Matrix3
+{
+public:
+	Vector3 rows[3];
+	Matrix3();
+	Vector3& operator[](const int);							//访问第i行
+	Matrix3 operator*(const Matrix3&); 						//矩阵乘法
+	Matrix3 operator*(const Vector3&); 						//矩阵乘法
+	Matrix3 transpose();									//转置
+};
 
+//4阶矩阵
+class Matrix4
+{
+	Vector4 rows[4];
+	Matrix4();
+	Vector4& operator[](const int);							//访问第i行
+	Matrix4 operator*(const Matrix4&); 						//矩阵乘法
+	Matrix4 operator*(const Vector4&); 						//矩阵乘法
+	Matrix4 transpose();									//转置
+};
 
-#endif 
